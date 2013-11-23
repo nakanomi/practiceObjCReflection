@@ -7,7 +7,7 @@
 //
 
 #import <objc/runtime.h>
-#import <objc/objc-class.h>
+#import <objc/runtime.h>
 
 #import "ViewController.h"
 #import "testClass.h"
@@ -30,6 +30,19 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+- (void)dealloc
+{
+#if __has_feature(objc_arc)
+	btnEnum = nil;
+	btnJson = nil;
+#else
+	[self.btnEnum release];
+	[self.btnJson release];
+#endif
+	[super dealloc];
+}
+
+
 /*
  辞書の中身
  key:	NSString*:	プロパティ名
@@ -47,9 +60,14 @@
 			objc_property_t property = properties[i];
 			const char *propName = property_getName(property);
 			const char *propType = property_getAttributes(property);
-			NSString* strName = [[NSString alloc] initWithUTF8String:propName];
+			NSString* strName = [NSString stringWithUTF8String:propName];//[[NSString alloc] initWithUTF8String:propName];
 			NSString* strType = [[NSString alloc] initWithUTF8String:propType];
 			[result setObject:strType forKey:strName];
+#if __has_feature(objc_arc)
+#else
+			[strType release];
+			//[strName release];
+#endif
 		}
 	}
 	@catch (NSException *exception) {
@@ -79,7 +97,7 @@ key-obj:	NSMutableArray*:	引数型情報（おそらく３番目から）
 			char buffer[1024];
 			SEL name = method_getName(methods[i]);
 			NSString* strName = NSStringFromSelector(name);
-			NSLog(@"%@", strName);
+			//NSLog(@"%@", strName);
 			//char *returnType = method_copyReturnType(methods[i]);
 			//NSLog(@"return type is %s", returnType);
 			//free(returnType);
@@ -87,11 +105,20 @@ key-obj:	NSMutableArray*:	引数型情報（おそらく３番目から）
 			unsigned int numOfArgs = method_getNumberOfArguments(methods[i]);
 			for (int j = 0; j < numOfArgs; j++) {
 				method_getArgumentType(methods[i], j, buffer, 1024);
-				NSLog(@"type of arg[%d] is %s", j, buffer);
+				//NSLog(@"type of arg[%d] is %s", j, buffer);
 				NSString* strArg = [[NSString alloc] initWithUTF8String:buffer];
 				[arrayArgs addObject:strArg];
+#if __has_feature(objc_arc)
+#else
+				[strArg release];
+#endif
 			}
 			[result setObject:arrayArgs forKey:strName];
+#if __has_feature(objc_arc)
+#else
+			[arrayArgs release];
+			//[strName release];
+#endif
 		}
 	}
 	@catch (NSException *exception) {
@@ -166,22 +193,64 @@ key-obj:	NSMutableArray*:	引数型情報（おそらく３番目から）
 		NSError* error = nil;
 		id jsonObjects = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments
 														   error:&error];
+		NSMutableDictionary *dictPropertyType = nil;
+		NSMutableDictionary *dictMethodArgType = nil;
 		if ([jsonObjects isKindOfClass:NSDictionary.class]) {
 			NSLog(@"json dictionary");
 			NSDictionary* dictJson = (NSDictionary*)jsonObjects;
 			NSArray* arKeys = [dictJson allKeys];
 			NSLog(@"%@", arKeys);
-			NSMutableDictionary *dictPropertyType = [self getDictOfPropertyTypeFromObj:obj];
-			NSMutableDictionary *dictMethodArgType = [self getDictOfMethodTypeFromObj:obj];
-#if __has_feature(objc_arc)
-			obj = nil;
-			dictPropertyType = nil;
-#else
-			[obj release];
-			[dictPropertyType release];
-#endif
+			dictPropertyType = [self getDictOfPropertyTypeFromObj:obj];
+			dictMethodArgType = [self getDictOfMethodTypeFromObj:obj];
+			
+			for (int indexKey = 0; indexKey < [arKeys count] ;indexKey++) {
+				NSString* strKey = [arKeys objectAtIndex:indexKey];
+				NSString* strType = [dictPropertyType objectForKey:strKey];
+				if (strType != nil) {
+					NSLog(@"property %@ exists and type is %@", strKey, strType);
+					char szProperty[512];
+					sprintf(szProperty, "%s", [strKey UTF8String]);
+					// プロパティの1文字目を大文字にする
+					int firstLetter = szProperty[0];
+					if ('a' <= firstLetter) {
+						if ('z' >= firstLetter) {
+							firstLetter -= 0x20;
+							szProperty[0] = (char)firstLetter;
+						}
+					}
+					// setter name
+					
+					char szSetterName[512];
+					sprintf(szSetterName, "set%s:", szProperty);
+					NSMutableArray* arrArgs = [dictMethodArgType objectForKey:[NSString stringWithUTF8String:szSetterName]];
+					if (arrArgs != nil) {
+						NSLog(@"found setter %s", szSetterName);
+						NSString* strNameOfSetter = [NSString stringWithUTF8String:szSetterName];
+						//objc_msgSend(obj, @selector(setWidth:), 4);
+						SEL sel = NSSelectorFromString(strNameOfSetter);
+						objc_msgSend(obj, sel, 4);
+						NSLog(@"%d", obj.width);
+						
+					}
+					
+				}
+			}
 		}
+#if __has_feature(objc_arc)
+		dictPropertyType = nil;
+		dictMethodArgType = nil;
+		data = nil;
+#else
+		[dictPropertyType release];
+		[dictMethodArgType release];
+		[data release];
+#endif
 	}
+#if __has_feature(objc_arc)
+	obj = nil;
+#else
+	[obj release];
+#endif
 	
 }
 
