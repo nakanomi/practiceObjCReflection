@@ -9,6 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface ViewController : UIViewController
+@property (weak, nonatomic) IBOutlet UIButton *btnEnum;
+@property (weak, nonatomic) IBOutlet UIButton *btnJson;
+
+
 - (IBAction)onPushButton:(id)sender;
 
 @end

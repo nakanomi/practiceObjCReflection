@@ -22,6 +22,7 @@
 		8A404A7818407C91003CAF1E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8A404A7618407C91003CAF1E /* InfoPlist.strings */; };
 		8A404A7A18407C91003CAF1E /* objCReflectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A404A7918407C91003CAF1E /* objCReflectionTests.m */; };
 		8A404A8518407DC0003CAF1E /* testClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A404A8418407DC0003CAF1E /* testClass.m */; };
+		8A404A8718408571003CAF1E /* isometric_grass_and_water.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A404A8618408571003CAF1E /* isometric_grass_and_water.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		8A404A7918407C91003CAF1E /* objCReflectionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = objCReflectionTests.m; sourceTree = "<group>"; };
 		8A404A8318407DC0003CAF1E /* testClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testClass.h; sourceTree = "<group>"; };
 		8A404A8418407DC0003CAF1E /* testClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = testClass.m; sourceTree = "<group>"; };
+		8A404A8618408571003CAF1E /* isometric_grass_and_water.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = isometric_grass_and_water.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +117,7 @@
 		8A404A5418407C91003CAF1E /* objCReflection */ = {
 			isa = PBXGroup;
 			children = (
+				8A404A8618408571003CAF1E /* isometric_grass_and_water.json */,
 				8A404A8318407DC0003CAF1E /* testClass.h */,
 				8A404A8418407DC0003CAF1E /* testClass.m */,
 				8A404A5D18407C91003CAF1E /* AppDelegate.h */,
@@ -233,6 +236,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A404A8718408571003CAF1E /* isometric_grass_and_water.json in Resources */,
 				8A404A6718407C91003CAF1E /* Images.xcassets in Resources */,
 				8A404A5918407C91003CAF1E /* InfoPlist.strings in Resources */,
 				8A404A6218407C91003CAF1E /* Main.storyboard in Resources */,
