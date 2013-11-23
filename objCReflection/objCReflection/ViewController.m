@@ -186,65 +186,76 @@ key-obj:	NSMutableArray*:	引数型情報（おそらく３番目から）
 		NSLog(@"%f", obj.NgNameValue);
 	}
 	else if ([sender isEqual:self.btnJson]) {
-		NSBundle* bundle = [NSBundle mainBundle];
-		NSString* path = [bundle pathForResource:@"isometric_grass_and_water"
-										  ofType:@"json"];
-		NSData* data = [[NSData alloc] initWithContentsOfFile:path];
-		NSError* error = nil;
-		id jsonObjects = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments
-														   error:&error];
-		NSMutableDictionary *dictPropertyType = nil;
-		NSMutableDictionary *dictMethodArgType = nil;
-		if ([jsonObjects isKindOfClass:NSDictionary.class]) {
-			NSLog(@"json dictionary");
-			NSDictionary* dictJson = (NSDictionary*)jsonObjects;
-			NSArray* arKeys = [dictJson allKeys];
-			NSLog(@"%@", arKeys);
-			dictPropertyType = [self getDictOfPropertyTypeFromObj:obj];
-			dictMethodArgType = [self getDictOfMethodTypeFromObj:obj];
-			
-			for (int indexKey = 0; indexKey < [arKeys count] ;indexKey++) {
-				NSString* strKey = [arKeys objectAtIndex:indexKey];
-				NSString* strType = [dictPropertyType objectForKey:strKey];
-				if (strType != nil) {
-					NSLog(@"property %@ exists and type is %@", strKey, strType);
-					char szProperty[512];
-					sprintf(szProperty, "%s", [strKey UTF8String]);
-					// プロパティの1文字目を大文字にする
-					int firstLetter = szProperty[0];
-					if ('a' <= firstLetter) {
-						if ('z' >= firstLetter) {
-							firstLetter -= 0x20;
-							szProperty[0] = (char)firstLetter;
+		@try {
+			NSBundle* bundle = [NSBundle mainBundle];
+			NSString* path = [bundle pathForResource:@"isometric_grass_and_water"
+											  ofType:@"json"];
+			NSData* data = [[NSData alloc] initWithContentsOfFile:path];
+			NSError* error = nil;
+			id jsonObjects = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments
+															   error:&error];
+			NSMutableDictionary *dictPropertyType = nil;
+			NSMutableDictionary *dictMethodArgType = nil;
+			if ([jsonObjects isKindOfClass:NSDictionary.class]) {
+				NSLog(@"json dictionary");
+				NSDictionary* dictJson = (NSDictionary*)jsonObjects;
+				NSArray* arKeys = [dictJson allKeys];
+				NSLog(@"%@", arKeys);
+				dictPropertyType = [self getDictOfPropertyTypeFromObj:obj];
+				dictMethodArgType = [self getDictOfMethodTypeFromObj:obj];
+				
+				for (int indexKey = 0; indexKey < [arKeys count] ;indexKey++) {
+					NSString* strKey = [arKeys objectAtIndex:indexKey];
+					NSString* strType = [dictPropertyType objectForKey:strKey];
+					if (strType != nil) {
+						NSLog(@"property %@ exists and type is %@", strKey, strType);
+						NSObject* jsonData = [dictJson objectForKey:strKey];
+						char szProperty[512];
+						sprintf(szProperty, "%s", [strKey UTF8String]);
+						// プロパティの1文字目を大文字にする
+						int firstLetter = szProperty[0];
+						if ('a' <= firstLetter) {
+							if ('z' >= firstLetter) {
+								firstLetter -= 0x20;
+								szProperty[0] = (char)firstLetter;
+							}
 						}
-					}
-					// setter name
-					
-					char szSetterName[512];
-					sprintf(szSetterName, "set%s:", szProperty);
-					NSMutableArray* arrArgs = [dictMethodArgType objectForKey:[NSString stringWithUTF8String:szSetterName]];
-					if (arrArgs != nil) {
-						NSLog(@"found setter %s", szSetterName);
-						NSString* strNameOfSetter = [NSString stringWithUTF8String:szSetterName];
-						//objc_msgSend(obj, @selector(setWidth:), 4);
-						SEL sel = NSSelectorFromString(strNameOfSetter);
-						objc_msgSend(obj, sel, 4);
-						NSLog(@"%d", obj.width);
+						// setter name
+						
+						char szSetterName[512];
+						sprintf(szSetterName, "set%s:", szProperty);
+						NSMutableArray* arrArgs = [dictMethodArgType objectForKey:[NSString stringWithUTF8String:szSetterName]];
+						if (arrArgs != nil) {
+							NSLog(@"found setter %s", szSetterName);
+							NSString* strNameOfSetter = [NSString stringWithUTF8String:szSetterName];
+							//objc_msgSend(obj, @selector(setWidth:), 4);
+							SEL sel = NSSelectorFromString(strNameOfSetter);
+							if ([jsonData isKindOfClass:[NSNumber class]]) {
+								NSNumber* numData = (NSNumber*)jsonData;
+								NSString* strValue = [numData stringValue ];
+								NSLog(@"%@ is numeric:%@", strKey, strValue);
+								objc_msgSend(obj, sel, [numData intValue]);
+							}
+							NSLog(@"width : %d", obj.width);
+							
+						}
 						
 					}
-					
 				}
 			}
-		}
 #if __has_feature(objc_arc)
-		dictPropertyType = nil;
-		dictMethodArgType = nil;
-		data = nil;
+			dictPropertyType = nil;
+			dictMethodArgType = nil;
+			data = nil;
 #else
-		[dictPropertyType release];
-		[dictMethodArgType release];
-		[data release];
+			[dictPropertyType release];
+			[dictMethodArgType release];
+			[data release];
 #endif
+		}
+		@catch (NSException *exception) {
+			NSLog(@"%s:%@", __PRETTY_FUNCTION__, exception);
+		}
 	}
 #if __has_feature(objc_arc)
 	obj = nil;
