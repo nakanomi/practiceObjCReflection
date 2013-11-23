@@ -74,10 +74,10 @@
 		}
 	}
 	free(methods);
-	[obj setFValue:1.0f];
-	// 値がセットされるのは片方だけ
-	NSLog(@"%f", obj.fValue);
-	NSLog(@"%f", obj.FValue);
+	[obj setNgNameValue:1.0f];
+	// 大文字と小文字の区別しか無いとき、値がセットされるのは片方だけ
+	NSLog(@"%f", obj.ngNameValue);
+	NSLog(@"%f", obj.NgNameValue);
 	
 	obj = nil;
 }

@@ -10,9 +10,9 @@
 
 @implementation testClass
 @synthesize width = _width;
-@synthesize fValue = _fValue;
+@synthesize ngNameValue = _ngNameValue;
 @synthesize dValue = _dValue;
-@synthesize FValue = _FValue;
+@synthesize NgNameValue = _NgNameValue;
 @synthesize strValue = _strValue;
 @synthesize nsNumber = _nsNumber;
 

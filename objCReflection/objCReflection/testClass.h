@@ -12,8 +12,9 @@
 
 @property (assign, nonatomic) int width;
 @property (assign, nonatomic) double dValue;
-@property (assign, nonatomic) float fValue;
-@property (assign, nonatomic) float FValue;
 @property (assign, nonatomic) NSString* strValue;
 @property (assign, nonatomic) NSNumber* nsNumber;
+// 良くない名前の例：名前の一文字目が大文字と小文字というだけの違いになっている
+@property (assign, nonatomic) float ngNameValue;
+@property (assign, nonatomic) float NgNameValue;
 @end
